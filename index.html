@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Professional Skills and Conduct — Unit Test</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
   :root {
     --bg: #f5f4f0;
@@ -499,7 +499,7 @@ async function submitTest() {
       student_date: date,
       message: body
     });
-  } catch (e) { console.error('EmailJS error:', e); }
+  } catch (e) { console.error('EmailJS error:', e); document.getElementById('statusMsg').textContent = 'Email error: ' + (e?.text || e?.message || JSON.stringify(e)); }
 
   document.getElementById('statusMsg').textContent = '';
 
