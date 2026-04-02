@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Professional Skills and Conduct — Unit Test</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root {
     --bg: #f5f4f0;
@@ -385,6 +386,7 @@
 
 <script>
 const TEACHER_EMAIL = 'rsteward@responsiveedtx.com';
+emailjs.init('hjoosL34N_v83ugJT');
 const mcKey = ['B','C','B','C','C'];
 const tfKey = ['F','F','T','T','F'];
 const matchKey = ['A','B','C','D','E'];
@@ -489,16 +491,15 @@ async function submitTest() {
   const body = `Student: ${name}\nClass: ${cls} | Date: ${date}\n\nSCORE SUMMARY\n─────────────\nSection 1 – Multiple Choice: ${mc}/20\nSection 2 – True/False:      ${tf}/10\nSection 3 – Matching:        ${mt}/10\nSection 4 – Short Answer:    ${sa}/30\nWritten Total:               ${total}/70 (${pct}% — ${letter})\nOral Presentation:           ___/30 (grade separately)\n\nDETAILED RESULTS\n─────────────────\n${mcLines}\n\n${tfLines}\n\n${mtLines}\n\nSHORT ANSWERS\n─────────────\n${saLines}`;
 
   try {
-    await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514', max_tokens: 100,
-        mcp_servers: [{ type: 'url', url: 'https://gmail.mcp.claude.com/mcp', name: 'gmail' }],
-        messages: [{ role: 'user', content: `Send email to ${TEACHER_EMAIL} subject "Test submitted: ${name} — Professional Skills & Conduct" body:\n\n${body}\n\nReply "sent".` }]
-      })
+    await emailjs.send('service_wzdtlxb', 'template_fk1hvfk', {
+      to_email: TEACHER_EMAIL,
+      subject: `Test submitted: ${name} — Professional Skills & Conduct`,
+      student_name: name,
+      student_class: cls,
+      student_date: date,
+      message: body
     });
-  } catch (e) {}
+  } catch (e) { console.error('EmailJS error:', e); }
 
   document.getElementById('statusMsg').textContent = '';
 
