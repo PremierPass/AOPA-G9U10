@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Professional Skills and Conduct — Unit Test</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e0ddd6;
+    --border-strong: #c8c5bc;
+    --text: #1a1917;
+    --text-muted: #6b6860;
+    --text-hint: #9c9a94;
+    --accent: #1a3a5c;
+    --accent-light: #e8f0f8;
+    --green: #2d6a3f;
+    --green-bg: #eaf4ee;
+    --red: #8b2020;
+    --red-bg: #faecec;
+    --amber: #7a4f00;
+    --amber-bg: #fdf3e0;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+  .page-header {
+    background: var(--accent);
+    color: white;
+    padding: 28px 24px 24px;
+    margin-bottom: 24px;
+  }
+  .page-header .course {
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    opacity: .6;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+  .page-header h1 { font-size: 22px; font-weight: 600; line-height: 1.2; }
+  .page-header .pts { font-size: 13px; opacity: .65; margin-top: 6px; }
+  .container { max-width: 680px; margin: 0 auto; padding: 0 16px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .sec-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 4px;
+  }
+  .sec-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .name-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .name-grid .full { grid-column: 1 / -1; }
+  .field label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500; }
+  .field input {
+    width: 100%;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 9px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus { border-color: var(--accent); background: white; }
+  .field input:disabled { opacity: .6; cursor: not-allowed; }
+  .q-block { margin-bottom: 20px; }
+  .q-block:last-child { margin-bottom: 0; }
+  .q-text { font-size: 14px; line-height: 1.55; margin-bottom: 10px; color: var(--text); }
+  .q-num { font-weight: 600; }
+  .opts { display: flex; flex-direction: column; gap: 6px; }
+  .opt-btn {
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 10px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.4;
+    transition: all .12s;
+  }
+  .opt-btn:hover:not(:disabled) { background: var(--accent-light); border-color: var(--accent); }
+  .opt-btn.chosen { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+  .opt-btn.reveal-correct { background: var(--green-bg); border-color: var(--green); color: var(--green); font-weight: 500; }
+  .opt-btn.reveal-wrong { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .opt-btn:disabled { cursor: not-allowed; }
+  .tf-row { display: flex; gap: 8px; }
+  .tf-btn {
+    flex: 1;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    padding: 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    text-align: center;
+    transition: all .12s;
+  }
+  .tf-btn:hover:not(:disabled) { background: var(--accent-light); border-color: var(--accent); }
+  .tf-btn.chosen { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .tf-btn.reveal-correct { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .tf-btn.reveal-wrong { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .tf-btn:disabled { cursor: not-allowed; }
+  .match-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .match-row:last-child { margin-bottom: 0; }
+  .match-label { font-size: 13px; line-height: 1.45; flex: 1; color: var(--text); }
+  .match-select {
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 7px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    width: 70px;
+    flex-shrink: 0;
+    cursor: pointer;
+    outline: none;
+  }
+  .match-select:focus { border-color: var(--accent); }
+  .match-select:disabled { opacity: .6; cursor: not-allowed; }
+  .match-select.sel-correct { background: var(--green-bg); border-color: var(--green); color: var(--green); font-weight: 500; }
+  .match-select.sel-wrong { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .match-key { font-size: 11px; color: var(--text-hint); margin-bottom: 14px; line-height: 1.6; }
+  textarea {
+    width: 100%;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    padding: 10px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    min-height: 96px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  textarea:focus { border-color: var(--accent); background: white; }
+  textarea:disabled { opacity: .6; cursor: not-allowed; resize: none; }
+  .submit-wrap { margin-top: 8px; }
+  .submit-btn {
+    width: 100%;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    padding: 15px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    letter-spacing: .01em;
+    transition: opacity .15s, transform .1s;
+  }
+  .submit-btn:hover:not(:disabled) { opacity: .92; }
+  .submit-btn:active:not(:disabled) { transform: scale(.99); }
+  .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .status { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 10px; min-height: 20px; font-style: italic; }
+  .result-wrap { margin-top: 20px; }
+  .score-hero {
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .score-hero .big { font-size: 56px; font-weight: 600; line-height: 1; }
+  .score-hero .denom { font-size: 22px; opacity: .6; font-weight: 400; }
+  .score-hero .grade-badge {
+    display: inline-block;
+    font-size: 28px;
+    font-weight: 600;
+    background: rgba(255,255,255,.15);
+    border-radius: var(--radius-sm);
+    padding: 4px 16px;
+    margin: 10px 0 6px;
+  }
+  .score-hero .sub { font-size: 13px; opacity: .65; }
+  .breakdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+  .breakdown-hdr { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg); display: flex; justify-content: space-between; }
+  .br-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; font-size: 13px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+  .br-row:last-child { border-bottom: none; }
+  .br-label { color: var(--text); flex: 1; line-height: 1.4; }
+  .br-pts { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .c { color: var(--green); }
+  .w { color: var(--red); }
+  .p { color: var(--amber); }
+  .sa-row { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .sa-row:last-child { border-bottom: none; }
+  .sa-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .sa-row-label { font-size: 13px; font-weight: 500; }
+  .sa-feedback { font-size: 12px; color: var(--text-muted); line-height: 1.55; background: var(--bg); border-radius: var(--radius-sm); padding: 8px 10px; }
+  .total-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; padding: 14px 16px; background: var(--bg); border-top: 1px solid var(--border); }
+  .locked-note { font-size: 12px; color: var(--text-hint); text-align: center; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+  @media(max-width:480px){
+    .name-grid { grid-template-columns: 1fr; }
+    .name-grid .full { grid-column: 1; }
+    .page-header h1 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="course">Exploring Aviation and Aerospace · Grade 9 · Unit 10, Section B, Lesson 1</div>
+  <h1>Professional Skills and Conduct</h1>
+  <div class="pts">100 points total · Multiple Choice · True/False · Matching · Short Answer · Oral Presentation</div>
+</div>
+
+<div class="container">
+
+  <!-- Student Info -->
+  <div class="card">
+    <div class="name-grid">
+      <div class="field full"><label>Full name</label><input type="text" id="sname" placeholder="First and last name"></div>
+      <div class="field"><label>Class period</label><input type="text" id="sclass" placeholder="e.g. Period 3"></div>
+      <div class="field"><label>Date</label><input type="text" id="sdate" placeholder="MM/DD/YYYY"></div>
+    </div>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="card">
+    <div class="sec-label">Section 1</div>
+    <div class="sec-title">Multiple Choice — 4 points each · 20 points total</div>
+
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">1.</span> What is the main difference between professional skills and technical skills?</div>
+      <div class="opts">
+        <button class="opt-btn" data-q="mc0" data-v="A" onclick="pick(this,'mc0')">A) Technical skills are harder to learn than professional skills</button>
+        <button class="opt-btn" data-q="mc0" data-v="B" onclick="pick(this,'mc0')">B) Professional skills are soft skills like communication and attitude, while technical skills are job-specific qualifications</button>
+        <button class="opt-btn" data-q="mc0" data-v="C" onclick="pick(this,'mc0')">C) Professional skills only apply to aviation careers</button>
+        <button class="opt-btn" data-q="mc0" data-v="D" onclick="pick(this,'mc0')">D) Technical skills can be used in any job; professional skills cannot</button>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">2.</span> An FAA Part 107 certificate for operating drones commercially is an example of a:</div>
+      <div class="opts">
+        <button class="opt-btn" data-q="mc1" data-v="A" onclick="pick(this,'mc1')">A) Professional skill</button>
+        <button class="opt-btn" data-q="mc1" data-v="B" onclick="pick(this,'mc1')">B) Soft skill</button>
+        <button class="opt-btn" data-q="mc1" data-v="C" onclick="pick(this,'mc1')">C) Technical skill</button>
+        <button class="opt-btn" data-q="mc1" data-v="D" onclick="pick(this,'mc1')">D) Communication skill</button>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">3.</span> Which statement best describes professional conduct?</div>
+      <div class="opts">
+        <button class="opt-btn" data-q="mc2" data-v="A" onclick="pick(this,'mc2')">A) Only following rules written in the employee handbook</button>
+        <button class="opt-btn" data-q="mc2" data-v="B" onclick="pick(this,'mc2')">B) The way you act and behave around others, including your attitude and appearance</button>
+        <button class="opt-btn" data-q="mc2" data-v="C" onclick="pick(this,'mc2')">C) Wearing a suit and tie every day at work</button>
+        <button class="opt-btn" data-q="mc2" data-v="D" onclick="pick(this,'mc2')">D) Following rules only when your boss is watching</button>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">4.</span> According to the lesson, what is the most important component of communication?</div>
+      <div class="opts">
+        <button class="opt-btn" data-q="mc3" data-v="A" onclick="pick(this,'mc3')">A) The exact words you choose</button>
+        <button class="opt-btn" data-q="mc3" data-v="B" onclick="pick(this,'mc3')">B) Your written communication skills</button>
+        <button class="opt-btn" data-q="mc3" data-v="C" onclick="pick(this,'mc3')">C) Your tone of voice and body language</button>
+        <button class="opt-btn" data-q="mc3" data-v="D" onclick="pick(this,'mc3')">D) Your educational credentials</button>
+      </div>
+    </div>
+
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">5.</span> Why should employees be careful about what they post on social media?</div>
+      <div class="opts">
+        <button class="opt-btn" data-q="mc4" data-v="A" onclick="pick(this,'mc4')">A) Only government employees have to worry about it</button>
+        <button class="opt-btn" data-q="mc4" data-v="B" onclick="pick(this,'mc4')">B) Social media posts are private and stay that way</button>
+        <button class="opt-btn" data-q="mc4" data-v="C" onclick="pick(this,'mc4')">C) Employers can legally take action for online behavior, even if it happened outside of work</button>
+        <button class="opt-btn" data-q="mc4" data-v="D" onclick="pick(this,'mc4')">D) Social media only affects personal relationships, not careers</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="card">
+    <div class="sec-label">Section 2</div>
+    <div class="sec-title">True or False — 2 points each · 10 points total</div>
+
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">6.</span> Technical skills and professional skills are the same thing.</div>
+      <div class="tf-row"><button class="tf-btn" data-q="tf0" data-v="T" onclick="pick(this,'tf0')">True</button><button class="tf-btn" data-q="tf0" data-v="F" onclick="pick(this,'tf0')">False</button></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">7.</span> Professional conduct only matters during job interviews, not on the actual job.</div>
+      <div class="tf-row"><button class="tf-btn" data-q="tf1" data-v="T" onclick="pick(this,'tf1')">True</button><button class="tf-btn" data-q="tf1" data-v="F" onclick="pick(this,'tf1')">False</button></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">8.</span> Non-verbal communication, such as body language, can be more important than the actual words you say.</div>
+      <div class="tf-row"><button class="tf-btn" data-q="tf2" data-v="T" onclick="pick(this,'tf2')">True</button><button class="tf-btn" data-q="tf2" data-v="F" onclick="pick(this,'tf2')">False</button></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">9.</span> Developing professionalism requires practice and listening to feedback from others.</div>
+      <div class="tf-row"><button class="tf-btn" data-q="tf3" data-v="T" onclick="pick(this,'tf3')">True</button><button class="tf-btn" data-q="tf3" data-v="F" onclick="pick(this,'tf3')">False</button></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">10.</span> Free speech protections mean an employer cannot take action against you for things you post online.</div>
+      <div class="tf-row"><button class="tf-btn" data-q="tf4" data-v="T" onclick="pick(this,'tf4')">True</button><button class="tf-btn" data-q="tf4" data-v="F" onclick="pick(this,'tf4')">False</button></div>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="card">
+    <div class="sec-label">Section 3</div>
+    <div class="sec-title">Matching — 2 points each · 10 points total</div>
+    <div class="match-key">A = Professional skills &nbsp;·&nbsp; B = Technical skills &nbsp;·&nbsp; C = Professional conduct &nbsp;·&nbsp; D = Non-verbal communication &nbsp;·&nbsp; E = Code of conduct</div>
+    <div class="match-row"><span class="match-label"><span class="q-num">1.</span> Soft skills like communication, attitude, and teamwork that contribute to workplace success.</span><select class="match-select" id="m0"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+    <div class="match-row"><span class="match-label"><span class="q-num">2.</span> Job-specific qualifications and credentials needed to perform a particular job.</span><select class="match-select" id="m1"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+    <div class="match-row"><span class="match-label"><span class="q-num">3.</span> The way you act, dress, and present yourself in a work setting.</span><select class="match-select" id="m2"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+    <div class="match-row"><span class="match-label"><span class="q-num">4.</span> Messages sent through tone of voice, facial expressions, and body movement.</span><select class="match-select" id="m3"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+    <div class="match-row"><span class="match-label"><span class="q-num">5.</span> A written set of rules defining expected behavior in a workplace or profession.</span><select class="match-select" id="m4"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="card">
+    <div class="sec-label">Section 4</div>
+    <div class="sec-title">Short Answer — 6 points each · 30 points total</div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">11.</span> Explain the difference between professional skills and technical skills. Give one example of each.</div>
+      <textarea id="sa0" placeholder="Write your answer here…"></textarea>
+    </div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">12.</span> Describe three principles of professional conduct from this lesson and explain why they matter in an aviation career.</div>
+      <textarea id="sa1" placeholder="Write your answer here…"></textarea>
+    </div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">13.</span> Why is it important for aviation professionals like pilots and air traffic controllers to follow strict codes of conduct? What could happen if they do not?</div>
+      <textarea id="sa2" placeholder="Write your answer here…"></textarea>
+    </div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">14.</span> Choose ONE professional skill you want to improve. Write a 2–3 sentence action plan with specific steps you will take.</div>
+      <textarea id="sa3" placeholder="Write your answer here…"></textarea>
+    </div>
+    <div class="q-block">
+      <div class="q-text"><span class="q-num">15.</span> How can social media impact your professional reputation? Give a specific example of something someone could post online that could hurt their aviation career.</div>
+      <textarea id="sa4" placeholder="Write your answer here…"></textarea>
+    </div>
+  </div>
+
+  <div class="submit-wrap">
+    <button class="submit-btn" id="submitBtn" onclick="submitTest()">Grade &amp; Submit</button>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <div id="resultArea"></div>
+
+</div>
+
+<script>
+const TEACHER_EMAIL = 'rsteward@responsiveedtx.com';
+const mcKey = ['B','C','B','C','C'];
+const tfKey = ['F','F','T','T','F'];
+const matchKey = ['A','B','C','D','E'];
+const chosen = {};
+let submitted = false;
+
+const saRubrics = [
+  'Full (6): Clearly distinguishes professional (soft/transferable: attitude, communication, teamwork) from technical (job-specific: licenses, certifications). Valid example of each. Partial (3-5): One example missing or explanation incomplete. Minimal (1-2): Vague or confuses the two. 0: Blank.',
+  'Full (6): Names and describes three from: conduct = how you act/behave; reflect positively on employer; attitude + appearance matter; communication = words + tone + body language. Connects each to aviation. Partial (3-5): Only two described or no aviation connection. Minimal (1-2): One principle vaguely mentioned.',
+  'Full (6): Explains safety-critical nature of aviation and that pilots/ATCs risk losing license/certification for conduct violations. Partial (3-5): Mentions safety or consequences but not both. Minimal (1-2): Generic answer with no aviation context.',
+  'Full (6): Names a specific professional skill, writes 2-3 sentences with actionable realistic steps (not just "I will try harder"). Partial (3-5): Skill named but plan vague. Minimal (1-2): Skill listed but no real plan. 0: Blank.',
+  'Full (6): Explains social media is not private, employers can act on online behavior even outside work, with a specific example. Partial (3-5): General concern without specific example. Minimal (1-2): Vague or off-topic.'
+];
+
+function pick(btn, q) {
+  if (submitted) return;
+  document.querySelectorAll(`[data-q="${q}"]`).forEach(b => b.classList.remove('chosen'));
+  btn.classList.add('chosen');
+  chosen[q] = btn.dataset.v;
+}
+
+function lockAll() {
+  document.querySelectorAll('.opt-btn, .tf-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.match-select').forEach(s => s.disabled = true);
+  document.querySelectorAll('textarea').forEach(t => t.disabled = true);
+  document.querySelectorAll('.field input').forEach(i => i.disabled = true);
+  document.getElementById('submitBtn').disabled = true;
+}
+
+function revealAnswers() {
+  for (let i = 0; i < 5; i++) {
+    const got = chosen['mc' + i];
+    const correct = mcKey[i];
+    document.querySelectorAll(`[data-q="mc${i}"]`).forEach(b => {
+      if (b.dataset.v === correct) b.classList.add('reveal-correct');
+      else if (b.dataset.v === got && got !== correct) b.classList.add('reveal-wrong');
+    });
+  }
+  for (let i = 0; i < 5; i++) {
+    const got = chosen['tf' + i];
+    const correct = tfKey[i];
+    document.querySelectorAll(`[data-q="tf${i}"]`).forEach(b => {
+      if (b.dataset.v === correct) b.classList.add('reveal-correct');
+      else if (b.dataset.v === got && got !== correct) b.classList.add('reveal-wrong');
+    });
+  }
+  for (let i = 0; i < 5; i++) {
+    const sel = document.getElementById('m' + i);
+    const got = sel.value;
+    if (got === matchKey[i]) sel.className = 'match-select sel-correct';
+    else if (got) sel.className = 'match-select sel-wrong';
+  }
+}
+
+async function gradeSA(ans, rubric) {
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: `Grade this 9th-grade aviation student short answer.\n\nRUBRIC: ${rubric}\n\nSTUDENT ANSWER: ${ans || '(blank)'}\n\nRespond ONLY:\nScore: X\nFeedback: [1-2 sentences]` }]
+      })
+    });
+    const d = await r.json();
+    const t = d.content?.map(c => c.text || '').join('') || '';
+    const sm = t.match(/Score:\s*(\d)/i);
+    const fm = t.match(/Feedback:\s*(.+)/is);
+    return { score: sm ? parseInt(sm[1]) : 0, feedback: fm ? fm[1].trim() : '' };
+  } catch (e) {
+    return { score: 0, feedback: 'Could not auto-grade.' };
+  }
+}
+
+async function submitTest() {
+  if (submitted) return;
+  const name = document.getElementById('sname').value.trim();
+  if (!name) { document.getElementById('statusMsg').textContent = 'Please enter your name before submitting.'; return; }
+  submitted = true;
+  lockAll();
+  document.getElementById('statusMsg').textContent = 'Grading your short answers — please wait a moment…';
+
+  const mc = mcKey.reduce((s, k, i) => s + (chosen['mc' + i] === k ? 4 : 0), 0);
+  const tf = tfKey.reduce((s, k, i) => s + (chosen['tf' + i] === k ? 2 : 0), 0);
+  const mt = matchKey.reduce((s, k, i) => s + (document.getElementById('m' + i).value === k ? 2 : 0), 0);
+  const saResults = await Promise.all([0,1,2,3,4].map(i => gradeSA(document.getElementById('sa' + i).value.trim(), saRubrics[i])));
+  const sa = saResults.reduce((s, r) => s + r.score, 0);
+  const total = mc + tf + mt + sa;
+  const pct = Math.round(total / 70 * 100);
+  const letter = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
+
+  revealAnswers();
+  document.getElementById('statusMsg').textContent = 'Sending results to your teacher…';
+
+  const cls = document.getElementById('sclass').value.trim() || '—';
+  const date = document.getElementById('sdate').value.trim() || '—';
+  const mcLines = mcKey.map((k, i) => `Q${i+1}: student=${chosen['mc'+i]||'—'} correct=${k} pts=${chosen['mc'+i]===k?4:0}/4`).join('\n');
+  const tfLines = tfKey.map((k, i) => `Q${i+6}: student=${chosen['tf'+i]||'—'} correct=${k} pts=${chosen['tf'+i]===k?2:0}/2`).join('\n');
+  const mtLines = matchKey.map((k, i) => `#${i+1}: student=${document.getElementById('m'+i).value||'—'} correct=${k} pts=${document.getElementById('m'+i).value===k?2:0}/2`).join('\n');
+  const saLines = saResults.map((r, i) => `Q${i+11} — ${r.score}/6\nAnswer: ${(document.getElementById('sa'+i).value||'(blank)').substring(0,300)}\nFeedback: ${r.feedback}`).join('\n\n');
+  const body = `Student: ${name}\nClass: ${cls} | Date: ${date}\n\nSCORE SUMMARY\n─────────────\nSection 1 – Multiple Choice: ${mc}/20\nSection 2 – True/False:      ${tf}/10\nSection 3 – Matching:        ${mt}/10\nSection 4 – Short Answer:    ${sa}/30\nWritten Total:               ${total}/70 (${pct}% — ${letter})\nOral Presentation:           ___/30 (grade separately)\n\nDETAILED RESULTS\n─────────────────\n${mcLines}\n\n${tfLines}\n\n${mtLines}\n\nSHORT ANSWERS\n─────────────\n${saLines}`;
+
+  try {
+    await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 100,
+        mcp_servers: [{ type: 'url', url: 'https://gmail.mcp.claude.com/mcp', name: 'gmail' }],
+        messages: [{ role: 'user', content: `Send email to ${TEACHER_EMAIL} subject "Test submitted: ${name} — Professional Skills & Conduct" body:\n\n${body}\n\nReply "sent".` }]
+      })
+    });
+  } catch (e) {}
+
+  document.getElementById('statusMsg').textContent = '';
+
+  const mcRows = mcKey.map((k, i) => {
+    const got = chosen['mc' + i] || '—'; const right = got === k;
+    return `<div class="br-row"><span class="br-label">Q${i+1} — you answered <strong>${got}</strong>${!right ? ' · correct: ' + k : ''}</span><span class="br-pts ${right ? 'c' : 'w'}">${right ? '+4' : '0'}/4</span></div>`;
+  }).join('');
+  const tfRows = tfKey.map((k, i) => {
+    const got = chosen['tf' + i] || '—'; const right = got === k;
+    const gl = got === 'T' ? 'True' : got === 'F' ? 'False' : '—';
+    const cl = k === 'T' ? 'True' : 'False';
+    return `<div class="br-row"><span class="br-label">Q${i+6} — ${gl}${!right ? ' · correct: ' + cl : ''}</span><span class="br-pts ${right ? 'c' : 'w'}">${right ? '+2' : '0'}/2</span></div>`;
+  }).join('');
+  const mtRows = matchKey.map((k, i) => {
+    const got = document.getElementById('m' + i).value || '—'; const right = got === k;
+    return `<div class="br-row"><span class="br-label">#${i+1} — ${got}${!right ? ' · correct: ' + k : ''}</span><span class="br-pts ${right ? 'c' : 'w'}">${right ? '+2' : '0'}/2</span></div>`;
+  }).join('');
+  const saRows = saResults.map((r, i) => `<div class="sa-row"><div class="sa-row-top"><span class="sa-row-label">Q${i+11}</span><span class="br-pts ${r.score>=5?'c':r.score>=3?'p':'w'}">${r.score}/6</span></div>${r.feedback ? `<div class="sa-feedback">${r.feedback}</div>` : ''}</div>`).join('');
+
+  document.getElementById('resultArea').innerHTML = `
+    <div class="result-wrap">
+      <div class="score-hero">
+        <div><span class="big">${total}</span><span class="denom">/70</span></div>
+        <div class="grade-badge">${letter}</div>
+        <div class="sub">Written score · ${pct}% · Oral presentation (30 pts) graded separately</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-hdr"><span>Section 1 — Multiple choice</span><span>${mc}/20</span></div>
+        ${mcRows}
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-hdr"><span>Section 2 — True / False</span><span>${tf}/10</span></div>
+        ${tfRows}
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-hdr"><span>Section 3 — Matching</span><span>${mt}/10</span></div>
+        ${mtRows}
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-hdr"><span>Section 4 — Short answer</span><span>${sa}/30</span></div>
+        ${saRows}
+        <div class="total-row"><span>Written total</span><span>${total} / 70</span></div>
+      </div>
+      <div class="locked-note">Your test has been submitted and sent to your teacher. No changes can be made.</div>
+    </div>`;
+}
+</script>
+</body>
+</html>
