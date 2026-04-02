@@ -468,27 +468,22 @@ async function submitTest() {
   if (!name) { document.getElementById('statusMsg').textContent = 'Please enter your name before submitting.'; return; }
   submitted = true;
   lockAll();
-  document.getElementById('statusMsg').textContent = 'Grading your short answers — please wait a moment…';
+  document.getElementById('statusMsg').textContent = 'Submitting your test…';
 
   const mc = mcKey.reduce((s, k, i) => s + (chosen['mc' + i] === k ? 4 : 0), 0);
   const tf = tfKey.reduce((s, k, i) => s + (chosen['tf' + i] === k ? 2 : 0), 0);
   const mt = matchKey.reduce((s, k, i) => s + (document.getElementById('m' + i).value === k ? 2 : 0), 0);
-  const saResults = await Promise.all([0,1,2,3,4].map(i => gradeSA(document.getElementById('sa' + i).value.trim(), saRubrics[i])));
-  const sa = saResults.reduce((s, r) => s + r.score, 0);
-  const total = mc + tf + mt + sa;
-  const pct = Math.round(total / 70 * 100);
-  const letter = pct >= 90 ? 'A' : pct >= 80 ? 'B' : pct >= 70 ? 'C' : pct >= 60 ? 'D' : 'F';
+  const objTotal = mc + tf + mt;
 
   revealAnswers();
-  document.getElementById('statusMsg').textContent = 'Sending results to your teacher…';
 
   const cls = document.getElementById('sclass').value.trim() || '—';
   const date = document.getElementById('sdate').value.trim() || '—';
   const mcLines = mcKey.map((k, i) => `Q${i+1}: student=${chosen['mc'+i]||'—'} correct=${k} pts=${chosen['mc'+i]===k?4:0}/4`).join('\n');
   const tfLines = tfKey.map((k, i) => `Q${i+6}: student=${chosen['tf'+i]||'—'} correct=${k} pts=${chosen['tf'+i]===k?2:0}/2`).join('\n');
   const mtLines = matchKey.map((k, i) => `#${i+1}: student=${document.getElementById('m'+i).value||'—'} correct=${k} pts=${document.getElementById('m'+i).value===k?2:0}/2`).join('\n');
-  const saLines = saResults.map((r, i) => `Q${i+11} — ${r.score}/6\nAnswer: ${(document.getElementById('sa'+i).value||'(blank)').substring(0,300)}\nFeedback: ${r.feedback}`).join('\n\n');
-  const body = `Student: ${name}\nClass: ${cls} | Date: ${date}\n\nSCORE SUMMARY\n─────────────\nSection 1 – Multiple Choice: ${mc}/20\nSection 2 – True/False:      ${tf}/10\nSection 3 – Matching:        ${mt}/10\nSection 4 – Short Answer:    ${sa}/30\nWritten Total:               ${total}/70 (${pct}% — ${letter})\nOral Presentation:           ___/30 (grade separately)\n\nDETAILED RESULTS\n─────────────────\n${mcLines}\n\n${tfLines}\n\n${mtLines}\n\nSHORT ANSWERS\n─────────────\n${saLines}`;
+  const saLines = [0,1,2,3,4].map(i => `Q${i+11}:\n${document.getElementById('sa'+i).value||'(blank)'}`).join('\n\n');
+  const body = `Student: ${name}\nClass: ${cls} | Date: ${date}\n\nAUTO-GRADED SCORE (Sections 1-3)\n─────────────────────────────────\nSection 1 – Multiple Choice: ${mc}/20\nSection 2 – True/False:      ${tf}/10\nSection 3 – Matching:        ${mt}/10\nObjective Total:             ${objTotal}/40\n\nSection 4 – Short Answer:    ___/30  (needs teacher grading)\nOral Presentation:           ___/30  (needs teacher grading)\nFinal Total:                 ___/100\n\nDETAILED RESULTS\n─────────────────\n${mcLines}\n\n${tfLines}\n\n${mtLines}\n\nSHORT ANSWER RESPONSES (teacher grades)\n────────────────────────────────────────\n${saLines}`;
 
   try {
     await emailjs.send('service_wzdtlxb', 'template_fk1hvfk', {
@@ -499,7 +494,7 @@ async function submitTest() {
       student_date: date,
       message: body
     });
-  } catch (e) { console.error('EmailJS error:', e); document.getElementById('statusMsg').textContent = 'Email error: ' + (e?.text || e?.message || JSON.stringify(e)); }
+  } catch (e) { console.error('EmailJS error:', e); }
 
   document.getElementById('statusMsg').textContent = '';
 
@@ -517,14 +512,17 @@ async function submitTest() {
     const got = document.getElementById('m' + i).value || '—'; const right = got === k;
     return `<div class="br-row"><span class="br-label">#${i+1} — ${got}${!right ? ' · correct: ' + k : ''}</span><span class="br-pts ${right ? 'c' : 'w'}">${right ? '+2' : '0'}/2</span></div>`;
   }).join('');
-  const saRows = saResults.map((r, i) => `<div class="sa-row"><div class="sa-row-top"><span class="sa-row-label">Q${i+11}</span><span class="br-pts ${r.score>=5?'c':r.score>=3?'p':'w'}">${r.score}/6</span></div>${r.feedback ? `<div class="sa-feedback">${r.feedback}</div>` : ''}</div>`).join('');
 
   document.getElementById('resultArea').innerHTML = `
     <div class="result-wrap">
       <div class="score-hero">
-        <div><span class="big">${total}</span><span class="denom">/70</span></div>
-        <div class="grade-badge">${letter}</div>
-        <div class="sub">Written score · ${pct}% · Oral presentation (30 pts) graded separately</div>
+        <div><span class="big">${objTotal}</span><span class="denom">/40</span></div>
+        <div class="grade-badge" style="font-size:14px;padding:6px 12px;">Sections 1–3</div>
+        <div class="sub">Your multiple choice, true/false, and matching score</div>
+        <div style="margin-top:14px;font-size:13px;background:rgba(255,255,255,.15);border-radius:8px;padding:10px 14px;line-height:1.6;">
+          Your short answer responses have been sent to your teacher for grading.<br>
+          Your teacher will provide your final grade.
+        </div>
       </div>
       <div class="breakdown-card">
         <div class="breakdown-hdr"><span>Section 1 — Multiple choice</span><span>${mc}/20</span></div>
@@ -538,12 +536,7 @@ async function submitTest() {
         <div class="breakdown-hdr"><span>Section 3 — Matching</span><span>${mt}/10</span></div>
         ${mtRows}
       </div>
-      <div class="breakdown-card">
-        <div class="breakdown-hdr"><span>Section 4 — Short answer</span><span>${sa}/30</span></div>
-        ${saRows}
-        <div class="total-row"><span>Written total</span><span>${total} / 70</span></div>
-      </div>
-      <div class="locked-note">Your test has been submitted and sent to your teacher. No changes can be made.</div>
+      <div class="locked-note">Your test has been submitted. Short answers and oral presentation will be graded by your teacher.</div>
     </div>`;
 }
 </script>
